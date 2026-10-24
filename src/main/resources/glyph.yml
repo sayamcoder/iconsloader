@@ -1,0 +1,25 @@
+glyphs:
+  calendar:
+    texture: "icons/calendar.png"
+    character: "\uE002"
+    permission: ""
+    ascent: 8
+    height: 8
+    chat-enabled: true
+  camel:
+    texture: "icons/camel.png"
+    character: "\uE003"
+    permission: ""
+    ascent: 8
+    height: 8
+    chat-enabled: true
+  sun:
+    texture: "icons/sun.png"
+    character: "\uE004"
+    permission: ""
+    ascent: 8
+    height: 8
+    chat-enabled: true
+
+# Make Sure Per Emoji Character: "/uE004" is different from all
+# All the usefull emojis already provided just register emojis :)

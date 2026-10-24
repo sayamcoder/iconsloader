@@ -23,7 +23,7 @@ public class UpdateChecker {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
                 // REPLACE 'YOUR_RESOURCE_ID' WITH YOUR ACTUAL SPIGOT ID ONCE PUBLISHED
-                String url = "https://api.spigotmc.org/legacy/update.php?resource=YOUR_RESOURCE_ID";
+                String url = "https://api.spigotmc.org/legacy/update.php?resource=139921";
                 HttpClient client = HttpClient.newHttpClient();
                 HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).build();
                 HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());

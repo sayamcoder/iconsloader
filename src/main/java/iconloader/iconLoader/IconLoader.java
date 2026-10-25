@@ -1,13 +1,15 @@
 package iconloader.iconLoader;
 
 import iconloader.iconLoader.chat.ChatEmojiListener;
+import iconloader.iconLoader.chat.ItemEmojiListener;
 import iconloader.iconLoader.command.CommandHandler;
 import iconloader.iconLoader.config.ConfigManager;
-import iconloader.iconLoader.dialog.DialogManager;
+import iconloader.iconLoader.gui.GuiManager;
 import iconloader.iconLoader.integration.PlaceholderApiIntegration;
 import iconloader.iconLoader.resourcepack.ResourcePackListener;
 import iconloader.iconLoader.resourcepack.ResourcePackManager;
 import iconloader.iconLoader.util.FileUtils;
+import iconloader.iconLoader.util.LangManager;
 import iconloader.iconLoader.util.UpdateChecker;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
@@ -17,16 +19,21 @@ public final class IconLoader extends JavaPlugin {
     private ConfigManager configManager;
     private UpdateChecker updateChecker;
     private ResourcePackManager resourcePackManager;
+    private GuiManager guiManager;
+    private LangManager langManager;
 
     @Override
     public void onEnable() {
         printBanner();
         FileUtils.extractDefaultTextures(this);
 
+        this.langManager = new LangManager(this);
         this.configManager = new ConfigManager(this);
         this.configManager.load();
+        this.langManager.load(); // Load after config
 
         this.resourcePackManager = new ResourcePackManager(this);
+        this.guiManager = new GuiManager(this);
 
         CommandHandler commandHandler = new CommandHandler(this);
         PluginCommand clCommand = getCommand("cl");
@@ -36,9 +43,10 @@ public final class IconLoader extends JavaPlugin {
         }
 
         getServer().getPluginManager().registerEvents(new ChatEmojiListener(this), this);
+        getServer().getPluginManager().registerEvents(new ItemEmojiListener(this), this); // Register Anvil Listener
         getServer().getPluginManager().registerEvents(new ResourcePackListener(this), this);
+        getServer().getPluginManager().registerEvents(guiManager, this);
 
-        // Register PlaceholderAPI if it exists
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new PlaceholderApiIntegration(this).register();
             getLogger().info("Successfully hooked into PlaceholderAPI!");
@@ -47,7 +55,7 @@ public final class IconLoader extends JavaPlugin {
         this.updateChecker = new UpdateChecker(this);
         this.updateChecker.checkForUpdates();
 
-        getLogger().info("IconsLoader enabled successfully.");
+        getLogger().info("IconsLoader v2.1 enabled successfully.");
     }
 
     @Override
@@ -58,6 +66,8 @@ public final class IconLoader extends JavaPlugin {
     public ConfigManager getConfigManager() { return configManager; }
     public UpdateChecker getUpdateChecker() { return updateChecker; }
     public ResourcePackManager getResourcePackManager() { return resourcePackManager; }
+    public GuiManager getGuiManager() { return guiManager; }
+    public LangManager getLangManager() { return langManager; }
 
     private void printBanner() {
         String[] banner = {
@@ -67,7 +77,7 @@ public final class IconLoader extends JavaPlugin {
             "§d   | | (_| (_) | | | \\__ \\| |__| (_) | (_| | (_| |  __/ |   ",
             "§d  |___\\___\\___/|_| |_|___/|_____\\___/ \\__,_|\\__,_|\\___|_|   ",
             "§8--------------------------------------------------",
-            "§7  Plugin: §fIconsLoader §7| Author: §fSayam §7| Ver: §f" + getPluginMeta().getVersion(),
+            "§7  Plugin: §fIconsLoader v2.1 §7| Author: §fSayam",
             "§8--------------------------------------------------"
         };
         for (String line : banner) { Bukkit.getConsoleSender().sendMessage(line); }

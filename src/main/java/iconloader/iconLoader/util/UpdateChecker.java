@@ -7,6 +7,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
 
 public class UpdateChecker {
     private final IconLoader plugin;
@@ -22,10 +23,12 @@ public class UpdateChecker {
         if (!enabled) return;
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
-                // REPLACE 'YOUR_RESOURCE_ID' WITH YOUR ACTUAL SPIGOT ID ONCE PUBLISHED
-                String url = "https://api.spigotmc.org/legacy/update.php?resource=139921";
+                String url = "https://api.spigotmc.org/legacy/update.php?resource=YOUR_RESOURCE_ID";
                 HttpClient client = HttpClient.newHttpClient();
-                HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).build();
+                HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .timeout(Duration.ofSeconds(5)) // FIX: Prevents the 5-minute hang!
+                    .build();
                 HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
                 if (response.statusCode() == 200) {
                     latestVersion = response.body().trim();

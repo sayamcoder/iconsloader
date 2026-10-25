@@ -1,3 +1,6 @@
+# Available languages: en, es, fr, de, pt, ru, zh, hi, ar, tr, id, ja
+language: "en"
+
 resource-pack:
   enabled: true
   url: ""

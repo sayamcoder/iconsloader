@@ -1,5 +1,12 @@
-# Available languages: en, es, fr, de, pt, ru, zh, hi, ar, tr, id, ja
 language: "en"
+
+http-server:
+  enabled: false
+  port: 8080
+  public-ip: "127.0.0.1"
+
+discord-webhook:
+  url: ""
 
 resource-pack:
   enabled: true
@@ -17,8 +24,9 @@ pack-generation:
   output-directory: "output"
   file-name: "IconsLoader-ResourcePack.zip"
 
+# SIMPLIFIED: Just drop your PNGs in plugins/IconsLoader/icons/
 textures:
-  directory: "textures/icons"
+  directory: "icons"
   max-file-size-mb: 4
   max-width: 256
   max-height: 256

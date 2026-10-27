@@ -4,6 +4,7 @@ import iconloader.iconLoader.IconLoader;
 import iconloader.iconLoader.glyph.GlyphDefinition;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
@@ -24,14 +25,23 @@ import java.util.List;
 public class GuiManager implements Listener {
     private final IconLoader plugin;
     private final NamespacedKey glyphKey;
+    private static final Key CUSTOM_FONT = Key.key("iconsloader:default");
 
     public GuiManager(IconLoader plugin) {
         this.plugin = plugin;
         this.glyphKey = new NamespacedKey(plugin, "glyph_name");
     }
 
-    public void openGui(Player player) {
-        Inventory inv = Bukkit.createInventory(null, 54, plugin.getLangManager().getMessage("gui-title"));
+    public void openAdminGui(Player player) {
+        openGui(player, "IconsLoader | Admin", true);
+    }
+
+    public void openPlayerGui(Player player) {
+        openGui(player, "IconsLoader | Emojis", false);
+    }
+
+    private void openGui(Player player, String title, boolean isAdmin) {
+        Inventory inv = Bukkit.createInventory(null, 54, Component.text(title));
         int slot = 0;
 
         for (GlyphDefinition glyph : plugin.getConfigManager().getGlyphRegistry().getGlyphs().values()) {
@@ -40,14 +50,21 @@ public class GuiManager implements Listener {
             ItemStack item = new ItemStack(Material.PAPER);
             ItemMeta meta = item.getItemMeta();
 
-            // THIS IS THE MAGIC: Apply CMD so the paper looks like the emoji
-            meta.setCustomModelData(glyph.getCustomModelData());
-
+            // Keep item as Paper, no custom models
             meta.displayName(Component.text(glyph.getName(), NamedTextColor.LIGHT_PURPLE).decoration(TextDecoration.ITALIC, false));
 
             List<Component> lore = new ArrayList<>();
-            lore.add(Component.text("Character: " + glyph.getCharacter(), NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
-            lore.add(Component.text("Click to send to chat!", NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, false));
+
+            // Render the emoji in the lore using our custom font!
+            Component emojiComponent = Component.text(glyph.getCharacter()).font(CUSTOM_FONT).decoration(TextDecoration.ITALIC, false);
+            lore.add(Component.text("Emoji: ", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false).append(emojiComponent));
+
+            if (isAdmin) {
+                lore.add(Component.text("Permission: " + (glyph.getPermission().isEmpty() ? "None" : glyph.getPermission()), NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+            }
+
+            lore.add(Component.empty());
+            lore.add(Component.text(isAdmin ? "Click to send to chat!" : "Click to put in chat bar!", NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, false));
 
             meta.lore(lore);
             meta.getPersistentDataContainer().set(glyphKey, PersistentDataType.STRING, glyph.getName());
@@ -61,7 +78,8 @@ public class GuiManager implements Listener {
 
     @EventHandler
     public void onClick(InventoryClickEvent event) {
-        if (!event.getView().title().equals(plugin.getLangManager().getMessage("gui-title"))) return;
+        String title = net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText().serialize(event.getView().title());
+        if (!title.startsWith("IconsLoader")) return;
         event.setCancelled(true);
 
         if (event.getCurrentItem() == null || event.getCurrentItem().getType() == Material.AIR) return;
@@ -73,9 +91,15 @@ public class GuiManager implements Listener {
             GlyphDefinition glyph = plugin.getConfigManager().getGlyphRegistry().getGlyphs().get(glyphName);
             if (glyph != null) {
                 player.closeInventory();
-                player.sendMessage(plugin.getLangManager().getMessage("gui-preview").append(
-                    Component.text(glyph.getCharacter()).font(Key.key("iconsloader:default"))
-                ));
+
+                if (title.contains("Admin")) {
+                    player.sendMessage(Component.text("Preview: ").append(
+                        Component.text(glyph.getCharacter()).font(CUSTOM_FONT)
+                    ));
+                } else {
+                    player.sendMessage(Component.text("§aClick below to insert the emoji into your chat:").appendNewline()
+                        .append(Component.text("§b§l[INSERT EMOJI]").clickEvent(ClickEvent.suggestCommand(":" + glyph.getName() + ":"))));
+                }
             }
         }
     }

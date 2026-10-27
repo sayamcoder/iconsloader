@@ -1,17 +1,21 @@
 name: IconsLoader
-version: 1.1.0
+version: 3.0.0
 main: iconloader.iconLoader.IconLoader
 api-version: '1.21'
-description: Upload, register, generate, and distribute custom emoji and icon resource packs directly from your Minecraft server.
+description: Ultimate Custom Emoji, Icon & Resource Pack Manager.
 author: Sayam
-website: https://github.com/yourusername/IconsLoader
 softdepend: [PlaceholderAPI]
 commands:
   cl:
     description: Main command for IconsLoader
-    usage: /cl <reload|pack|info>
     aliases: [icons, iconsloader]
+  emojis:
+    description: Open the player emoji picker
+    permission: iconsloader.use
 permissions:
   iconsloader.admin:
-    description: Access all IconsLoader administration commands
+    description: Access all admin commands
     default: op
+  iconsloader.use:
+    description: Use the player emoji picker
+    default: true

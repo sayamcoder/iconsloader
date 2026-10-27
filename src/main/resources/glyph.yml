@@ -22,4 +22,3 @@ glyphs:
     chat-enabled: true
 
 # Make Sure Per Emoji Character: "/uE004" is different from all
-# All the usefull emojis already provided just register emojis :)

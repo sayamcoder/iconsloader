@@ -36,11 +36,12 @@ public class ResourcePackGenerator {
 
             File tempPackFile = new File(outputDir, "IconsLoader-ResourcePack.tmp");
             File finalPackFile = new File(outputDir, "IconsLoader-ResourcePack.zip");
-            File iconsDir = new File(plugin.getDataFolder(), "textures/icons");
+
+            File iconsDir = new File(plugin.getDataFolder(), "icons");
             File[] diskIcons = iconsDir.listFiles((dir, name) -> name.toLowerCase().endsWith(".png"));
 
             if (diskIcons == null || diskIcons.length == 0) {
-                Bukkit.getScheduler().runTask(plugin, () -> sender.sendMessage("§cNo PNG files found!"));
+                Bukkit.getScheduler().runTask(plugin, () -> sender.sendMessage("§cNo PNG files found in /icons/ folder!"));
                 return;
             }
 
@@ -54,14 +55,6 @@ public class ResourcePackGenerator {
 
                 JsonObject root = new JsonObject();
                 JsonArray providerArray = new JsonArray();
-
-                JsonObject paperModel = new JsonObject();
-                paperModel.addProperty("parent", "item/generated");
-                JsonObject textures = new JsonObject();
-                textures.addProperty("layer0", "item/paper");
-                paperModel.add("textures", textures);
-                JsonArray overrides = new JsonArray();
-
                 int charCode = 0xE000;
 
                 for (File icon : diskIcons) {
@@ -71,13 +64,12 @@ public class ResourcePackGenerator {
                     String character = def != null ? def.getCharacter() : String.valueOf((char) charCode++);
                     int ascent = def != null ? def.getAscent() : 8;
                     int height = def != null ? def.getHeight() : 8;
-                    int cmd = def != null ? def.getCustomModelData() : 10000;
 
-                    // Font JSON
+                    // 1. Font JSON
                     JsonObject provider = new JsonObject();
                     provider.addProperty("type", "bitmap");
-                    String zipPath = "font/icons/" + icon.getName();
-                    provider.addProperty("file", "minecraft:" + zipPath);
+                    String fontPath = "font/icons/" + icon.getName();
+                    provider.addProperty("file", "minecraft:" + fontPath);
                     provider.addProperty("ascent", ascent);
                     provider.addProperty("height", height);
                     JsonArray chars = new JsonArray();
@@ -85,47 +77,33 @@ public class ResourcePackGenerator {
                     provider.add("chars", chars);
                     providerArray.add(provider);
 
-                    // Copy to font folder
-                    zos.putNextEntry(new ZipEntry("assets/minecraft/textures/" + zipPath));
+                    // 2. Copy to font folder
+                    zos.putNextEntry(new ZipEntry("assets/minecraft/textures/" + fontPath));
                     Files.copy(icon.toPath(), zos);
                     zos.closeEntry();
 
-                    // Copy to item folder (for GUI)
-                    String itemZipPath = "item/icons/" + icon.getName();
-                    zos.putNextEntry(new ZipEntry("assets/minecraft/textures/" + itemZipPath));
+                    // 3. Copy to item folder
+                    String itemTexPath = "item/icons/" + icon.getName();
+                    zos.putNextEntry(new ZipEntry("assets/minecraft/textures/" + itemTexPath));
                     Files.copy(icon.toPath(), zos);
                     zos.closeEntry();
 
-                    // Create Item Model JSON
+                    // 4. Create Item Model JSON (FIXED: Removed .png from layer0)
                     JsonObject itemModel = new JsonObject();
                     itemModel.addProperty("parent", "item/generated");
                     JsonObject itemTex = new JsonObject();
-                    itemTex.addProperty("layer0", "minecraft:" + itemZipPath);
+                    // REMOVED ".png" HERE
+                    itemTex.addProperty("layer0", "minecraft:item/icons/" + key);
                     itemModel.add("textures", itemTex);
 
                     zos.putNextEntry(new ZipEntry("assets/minecraft/models/item/icons/" + key + ".json"));
                     zos.write(gson.toJson(itemModel).getBytes());
                     zos.closeEntry();
-
-                    // Add to paper.json overrides
-                    JsonObject override = new JsonObject();
-                    JsonObject predicate = new JsonObject();
-                    predicate.addProperty("custom_model_data", cmd);
-                    override.add("predicate", predicate);
-                    override.addProperty("model", "minecraft:item/icons/" + key);
-                    overrides.add(override);
                 }
 
-                // Save Font JSON
                 root.add("providers", providerArray);
                 zos.putNextEntry(new ZipEntry("assets/iconsloader/font/default.json"));
                 zos.write(gson.toJson(root).getBytes());
-                zos.closeEntry();
-
-                // Save Paper Model JSON
-                paperModel.add("overrides", overrides);
-                zos.putNextEntry(new ZipEntry("assets/minecraft/models/item/paper.json"));
-                zos.write(gson.toJson(paperModel).getBytes());
                 zos.closeEntry();
 
                 zos.finish();
@@ -136,8 +114,6 @@ public class ResourcePackGenerator {
 
             try {
                 Files.move(tempPackFile.toPath(), finalPackFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-
-                // AUTO-SHA GENERATION
                 String sha1 = getFileChecksum(finalPackFile);
                 FileConfiguration config = plugin.getConfig();
                 config.set("resource-pack.sha1", sha1);
@@ -145,7 +121,7 @@ public class ResourcePackGenerator {
 
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     sender.sendMessage("§aPack generated async! Size: " + (finalPackFile.length() / 1024) + " KB (" + diskIcons.length + " textures)");
-                    sender.sendMessage("§aNew SHA-1 automatically saved to config.yml: §f" + sha1);
+                    sender.sendMessage("§aNew SHA-1 automatically saved to config.yml.");
                 });
             } catch (Exception e) {
                 Bukkit.getScheduler().runTask(plugin, () -> sender.sendMessage("§cFailed to save ZIP or SHA-1."));
@@ -174,8 +150,30 @@ public class ResourcePackGenerator {
         if (version.startsWith("1.21.8")) return 55;
         if (version.startsWith("1.21.7")) return 54;
         if (version.startsWith("1.21.6")) return 53;
-        if (version.startsWith("1.21.5")) return 46;
-        if (version.startsWith("1.21.4")) return 45;
+        if (version.startsWith("1.21.4") || version.startsWith("1.21.5")) return 46;
+        if (version.startsWith("1.21.2") || version.startsWith("1.21.3")) return 42;
+        if (version.startsWith("1.21.1") || version.startsWith("1.21")) return 34;
+
+        if (version.startsWith("1.20.5") || version.startsWith("1.20.6")) return 32;
+        if (version.startsWith("1.20.3") || version.startsWith("1.20.4")) return 22;
+        if (version.startsWith("1.20.2")) return 18;
+        if (version.startsWith("1.20") || version.startsWith("1.20.1")) return 15;
+
+        if (version.startsWith("1.19.4")) return 13;
+        if (version.startsWith("1.19.3")) return 12;
+        if (version.startsWith("1.19")) return 9;
+
+        if (version.startsWith("1.18")) return 8;
+        if (version.startsWith("1.17")) return 7;
+
+        if (version.startsWith("1.16.2") || version.startsWith("1.16.3") || version.startsWith("1.16.4") || version.startsWith("1.16.5")) return 6;
+        if (version.startsWith("1.16") || version.startsWith("1.15")) return 5;
+
+        if (version.startsWith("1.14") || version.startsWith("1.13")) return 4;
+        if (version.startsWith("1.12") || version.startsWith("1.11")) return 3;
+        if (version.startsWith("1.10") || version.startsWith("1.9")) return 2;
+        if (version.startsWith("1.8")) return 1;
+
         return 34;
     }
 }

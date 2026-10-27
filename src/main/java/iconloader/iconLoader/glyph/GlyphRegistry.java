@@ -17,13 +17,13 @@ public class GlyphRegistry {
         ConfigurationSection section = config.getConfigurationSection("glyphs");
         if (section == null) section = config.createSection("glyphs");
 
-        int cmdCounter = 10000; // Start CMD at 10000 to avoid conflicts
+        int cmdCounter = 10000;
 
         for (String key : section.getKeys(false)) {
             ConfigurationSection glyphSection = section.getConfigurationSection(key);
             if (glyphSection == null) continue;
 
-            String texture = glyphSection.getString("texture", "icons/" + key + ".png");
+            String texture = glyphSection.getString("texture", key + ".png");
             if (texture.contains("..")) continue;
 
             String character = glyphSection.getString("character", "\\uE000");
@@ -31,7 +31,6 @@ public class GlyphRegistry {
             int ascent = glyphSection.getInt("ascent", 8);
             int height = glyphSection.getInt("height", 8);
 
-            // Get or assign CMD
             int cmd = glyphSection.getInt("custom-model-data", cmdCounter++);
             glyphSection.set("custom-model-data", cmd);
 
@@ -42,16 +41,17 @@ public class GlyphRegistry {
             glyphs.put(key, new GlyphDefinition(key, texture, character, permission, ascent, height, cmd));
         }
 
-        File texturesDir = new File(plugin.getDataFolder(), "textures/icons");
-        if (texturesDir.exists() && texturesDir.isDirectory()) {
-            File[] files = texturesDir.listFiles((dir, name) -> name.toLowerCase().endsWith(".png"));
+        // Scan the NEW /icons folder
+        File iconsDir = new File(plugin.getDataFolder(), "icons");
+        if (iconsDir.exists() && iconsDir.isDirectory()) {
+            File[] files = iconsDir.listFiles((dir, name) -> name.toLowerCase().endsWith(".png"));
             if (files != null) {
                 boolean changed = false;
                 for (File file : files) {
                     String key = file.getName().replace(".png", "");
                     if (!glyphs.containsKey(key)) {
                         String character = findNextAvailableChar();
-                        String path = "icons/" + file.getName();
+                        String path = file.getName(); // Just the filename now
                         int cmd = cmdCounter++;
 
                         glyphs.put(key, new GlyphDefinition(key, path, character, "", 8, 8, cmd));

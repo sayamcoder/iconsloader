@@ -1,25 +1,32 @@
-:rocket: **IconsLoader v2.1 Update is Here!** :rocket:
+@everyone 
 
-Hey everyone! We just pushed a massive update to **IconsLoader**, the ultimate custom emoji and resource pack manager for your server. We listened to your feedback and fixed a ton of bugs, plus added some huge new features.
+:rocket: **IconsLoader v3.0 is officially out!** :rocket:
 
-:sparkles: **What's New in v2.1?**
-- :desktop: **Visual Emoji GUI:** Type `/cl gui` to open a beautiful menu. The items actually display your custom emojis now (1.21.4+ Item Models)!
-- :tools: **Anvil Support:** Players can now use emojis in Anvils! Type `:heart:` to put custom icons directly onto their swords or armor.
-- :earth_africa: **12 Built-in Languages:** Full support for EN, ES, FR, DE, PT, RU, ZH, HI, AR, TR, ID, and JA.
-- :lock: **Auto-SHA1 Generation:** Forgot to update your hash? We got you. The plugin now automatically calculates the SHA-1 hash of the generated resource pack and puts it directly into your `config.yml`.
-- :link: **PlaceholderAPI:** Use emojis in TAB, Scoreboards, and Holograms using `%iconsloader_heart%`.
+This is our biggest update yet. We've completely revolutionized how server owners handle custom emojis and resource packs. Say goodbye to complicated external hosting!
+
+Here is what's new in **v3.0**:
+
+:globe_with_meridians: **Built-in HTTP Server**
+> No more Dropbox, no more MCPacks, no more external links! The plugin can now host the resource pack directly from your server's IP. Just turn it on in the config, and the plugin handles the rest automatically.
+
+:video_game: **Player Emoji GUI (`/emojis`)**
+> Players can now open a beautiful GUI to browse all your server's emojis. When they click one, it automatically inserts `:heart:` into their chat bar! Perfect for players who don't know the exact names.
+
+:bell: **Discord Webhooks**
+> Want to know if players are actually accepting your resource pack? Set up a webhook in the config, and the plugin will send a message to your Discord every time a player accepts or declines the pack.
+
+:file_folder: **Simplified Folder Structure**
+> We listened to your feedback. The deep `textures/icons/` folder is gone. You can now just drop your PNGs directly into `plugins/IconsLoader/icons/`.
 
 :tools: **Bug Fixes & Optimizations:**
-- :white_check_mark: Fixed `/cl glyph info` doing nothing.
-- :white_check_mark: Fixed `/cl glyph list` showing empty square boxes.
-- :white_check_mark: Fixed chat conflicts! Emojis now inject perfectly without breaking LuckPerms or other chat plugins.
-- :white_check_mark: Fixed the update checker hanging for 5 minutes (added a 5s timeout).
-- :white_check_mark: Fixed `<prefix>` showing up as raw text in language files.
+> :white_check_mark: Fixed GUI items showing as purple/black missing textures (now uses Paper + Lore for perfect display).
+> :white_check_mark: Full `pack_format` support for all versions from 1.8 to 1.21.8.
 
-:inbox_tray: **Download & Support:**
-- **Spigot:** [[Download Now]](https://www.spigotmc.org/resources/iconsloader-add-custom-emojis-to-chat-tab-holograms.139921/)
-- **Discord Support:** https://discord.gg/dgJza7ZrE
 
-*Make sure to completely restart your server and run `/cl pack generate` to get the new GUI models and updated SHA-1!*
+:inbox_tray: **Update Now:**
+> **Spigot:** [[Download]](https://www.spigotmc.org/resources/iconsloader-add-custom-emojis-to-chat-tab-holograms-new-the-http-player-upd.139921/)
+> **Discord Support:** https://discord.gg/dgJza7ZrE
 
-If you enjoy the plugin, please leave a :star: review on Spigot! It helps immensely. :heart:
+*:warning: **Updating from v2.x?** Make sure to completely restart your server. Your old icons will be automatically migrated to the new `/icons/` folder!*
+
+If you enjoy the plugin, please leave a :star: review on Spigot. It really helps us out! :heart:

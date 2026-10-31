@@ -3,10 +3,10 @@ language: "en"
 http-server:
   enabled: false
   port: 8080
-  public-ip: "127.0.0.1"
+  public-ip: "127.0.0.1" 
 
 discord-webhook:
-  url: ""
+  url: "" 
 
 resource-pack:
   enabled: true
@@ -24,7 +24,6 @@ pack-generation:
   output-directory: "output"
   file-name: "IconsLoader-ResourcePack.zip"
 
-# SIMPLIFIED: Just drop your PNGs in plugins/IconsLoader/icons/
 textures:
   directory: "icons"
   max-file-size-mb: 4
@@ -37,3 +36,5 @@ chat:
   token-format: ":{name}:"
   preserve-unknown-tokens: true
   require-permission: true
+  anti-spam: true
+  cooldown-ms: 1000

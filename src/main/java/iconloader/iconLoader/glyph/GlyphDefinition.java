@@ -1,5 +1,7 @@
 package iconloader.iconLoader.glyph;
 
+import java.util.List;
+
 public class GlyphDefinition {
     private final String name;
     private final String texturePath;
@@ -7,9 +9,10 @@ public class GlyphDefinition {
     private final String permission;
     private final int ascent;
     private final int height;
-    private final int customModelData; // New
+    private final int customModelData;
+    private final List<String> aliases; // NEW
 
-    public GlyphDefinition(String name, String texturePath, String character, String permission, int ascent, int height, int customModelData) {
+    public GlyphDefinition(String name, String texturePath, String character, String permission, int ascent, int height, int customModelData, List<String> aliases) {
         this.name = name;
         this.texturePath = texturePath;
         this.character = character;
@@ -17,6 +20,7 @@ public class GlyphDefinition {
         this.ascent = ascent;
         this.height = height;
         this.customModelData = customModelData;
+        this.aliases = aliases;
     }
 
     public String getName() { return name; }
@@ -25,5 +29,6 @@ public class GlyphDefinition {
     public String getPermission() { return permission; }
     public int getAscent() { return ascent; }
     public int getHeight() { return height; }
-    public int getCustomModelData() { return customModelData; } // New
+    public int getCustomModelData() { return customModelData; }
+    public List<String> getAliases() { return aliases; }
 }

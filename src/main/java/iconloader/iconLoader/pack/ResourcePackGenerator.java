@@ -146,34 +146,34 @@ public class ResourcePackGenerator {
         return sb.toString();
     }
 
-    private int getPackFormat(String version) {
-        if (version.startsWith("1.21.8")) return 55;
-        if (version.startsWith("1.21.7")) return 54;
-        if (version.startsWith("1.21.6")) return 53;
-        if (version.startsWith("1.21.4") || version.startsWith("1.21.5")) return 46;
-        if (version.startsWith("1.21.2") || version.startsWith("1.21.3")) return 42;
-        if (version.startsWith("1.21.1") || version.startsWith("1.21")) return 34;
+        private int getPackFormat(String version) {
+        try {
+            if (version.startsWith("1.8")) return 1;
+            if (version.startsWith("1.9") || version.startsWith("1.10")) return 2;
+            if (version.startsWith("1.11") || version.startsWith("1.12")) return 3;
+            if (version.startsWith("1.13") || version.startsWith("1.14")) return 4;
+            if (version.startsWith("1.15") || version.startsWith("1.16.1")) return 5;
+            if (version.startsWith("1.16")) return 6;
+            if (version.startsWith("1.17")) return 7;
+            if (version.startsWith("1.18")) return 8;
+            if (version.startsWith("1.19.1") || version.startsWith("1.19.2")) return 9;
+            if (version.startsWith("1.19.3")) return 12;
+            if (version.startsWith("1.19.4")) return 13;
+            if (version.startsWith("1.20.1") || version.startsWith("1.20")) return 15;
+            if (version.startsWith("1.20.2")) return 18;
+            if (version.startsWith("1.20.3") || version.startsWith("1.20.4")) return 22;
+            if (version.startsWith("1.20.5") || version.startsWith("1.20.6")) return 32;
+            if (version.startsWith("1.21.1") || version.startsWith("1.21")) return 34;
+            if (version.startsWith("1.21.2") || version.startsWith("1.21.3")) return 42;
+            if (version.startsWith("1.21.4")) return 46;
+            if (version.startsWith("1.21.5")) return 55;
+            if (version.startsWith("1.21.6")) return 63;
+            if (version.startsWith("1.21.7") || version.startsWith("1.21.8")) return 64;
 
-        if (version.startsWith("1.20.5") || version.startsWith("1.20.6")) return 32;
-        if (version.startsWith("1.20.3") || version.startsWith("1.20.4")) return 22;
-        if (version.startsWith("1.20.2")) return 18;
-        if (version.startsWith("1.20") || version.startsWith("1.20.1")) return 15;
-
-        if (version.startsWith("1.19.4")) return 13;
-        if (version.startsWith("1.19.3")) return 12;
-        if (version.startsWith("1.19")) return 9;
-
-        if (version.startsWith("1.18")) return 8;
-        if (version.startsWith("1.17")) return 7;
-
-        if (version.startsWith("1.16.2") || version.startsWith("1.16.3") || version.startsWith("1.16.4") || version.startsWith("1.16.5")) return 6;
-        if (version.startsWith("1.16") || version.startsWith("1.15")) return 5;
-
-        if (version.startsWith("1.14") || version.startsWith("1.13")) return 4;
-        if (version.startsWith("1.12") || version.startsWith("1.11")) return 3;
-        if (version.startsWith("1.10") || version.startsWith("1.9")) return 2;
-        if (version.startsWith("1.8")) return 1;
-
-        return 34;
+            // Future Versions (1.21.9, 1.22, 26.3 etc.)
+            // We return a high number so it won't break.
+            return 64;
+        } catch (Exception ignored) {}
+        return 34; // Default fallback
     }
 }

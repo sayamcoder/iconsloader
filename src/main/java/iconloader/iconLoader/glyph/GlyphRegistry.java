@@ -6,6 +6,9 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -30,18 +33,21 @@ public class GlyphRegistry {
             String permission = glyphSection.getString("permission", "");
             int ascent = glyphSection.getInt("ascent", 8);
             int height = glyphSection.getInt("height", 8);
-
+            
             int cmd = glyphSection.getInt("custom-model-data", cmdCounter++);
             glyphSection.set("custom-model-data", cmd);
+
+            // NEW: Parse Aliases
+            List<String> aliases = glyphSection.getStringList("aliases");
+            if (aliases == null) aliases = new ArrayList<>();
 
             if (character.startsWith("\\u")) {
                 try { character = String.valueOf((char) Integer.parseInt(character.substring(2), 16)); } catch (Exception ignored) {}
             }
 
-            glyphs.put(key, new GlyphDefinition(key, texture, character, permission, ascent, height, cmd));
+            glyphs.put(key, new GlyphDefinition(key, texture, character, permission, ascent, height, cmd, aliases));
         }
 
-        // Scan the NEW /icons folder
         File iconsDir = new File(plugin.getDataFolder(), "icons");
         if (iconsDir.exists() && iconsDir.isDirectory()) {
             File[] files = iconsDir.listFiles((dir, name) -> name.toLowerCase().endsWith(".png"));
@@ -51,14 +57,15 @@ public class GlyphRegistry {
                     String key = file.getName().replace(".png", "");
                     if (!glyphs.containsKey(key)) {
                         String character = findNextAvailableChar();
-                        String path = file.getName(); // Just the filename now
+                        String path = file.getName(); 
                         int cmd = cmdCounter++;
-
-                        glyphs.put(key, new GlyphDefinition(key, path, character, "", 8, 8, cmd));
+                        
+                        glyphs.put(key, new GlyphDefinition(key, path, character, "", 8, 8, cmd, new ArrayList<>()));
 
                         section.set(key + ".texture", path);
                         section.set(key + ".character", String.format("\\u%04X", (int) character.charAt(0)));
                         section.set(key + ".custom-model-data", cmd);
+                        section.set(key + ".aliases", Arrays.asList("example1", "example2")); // Show example in yml
                         changed = true;
                     }
                 }

@@ -1,6 +1,6 @@
 # IconsLoader v4.0
 
-[![SpigotMC](https://img.shields.io/badge/SpigotMC-Download-orange?style=for-the-badge&logo=spigotmc)]([SPIGOT LINK HERE])
+[![SpigotMC](https://img.shields.io/badge/SpigotMC-Download-orange?style=for-the-badge&logo=spigotmc)]([[SPIGOT](https://www.spigotmc.org/resources/iconsloader-v4-0-ultimate-emoji-icon-resource-pack-manager-1-8-1-21.139921/)])
 [![Discord](https://img.shields.io/badge/Discord-Join-blue?style=for-the-badge&logo=discord)](https://discord.gg/dgJza7ZrE)
 [![Java Version](https://img.shields.io/badge/Java-21-red?style=for-the-badge&logo=java)](https://adoptium.net/)
 [![Paper](https://img.shields.io/badge/Paper-1.21+-green?style=for-the-badge)](https://papermc.io/)

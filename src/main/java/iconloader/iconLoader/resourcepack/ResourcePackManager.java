@@ -9,7 +9,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.net.URI;
-import java.util.UUID;
+import java.net.URISyntaxException;
 
 public class ResourcePackManager {
     private final IconLoader plugin;
@@ -21,46 +21,67 @@ public class ResourcePackManager {
     public void sendPack(Player player) {
         if (!plugin.getConfig().getBoolean("resource-pack.enabled", true)) return;
 
-        String url = plugin.getConfig().getString("resource-pack.url", "");
+        String url = plugin.getConfig().getString("resource-pack.url", "").trim();
         if (url.isEmpty()) return;
 
-        String sha1String = plugin.getConfig().getString("resource-pack.sha1", "");
-        if (sha1String.isEmpty()) {
-            plugin.getLogger().warning("SHA-1 hash is missing in config.yml! The pack may not send correctly.");
+        URI packUri;
+        try {
+            packUri = new URI(url);
+            if (packUri.getHost() == null) throw new URISyntaxException(url, "missing host");
+        } catch (URISyntaxException e) {
+            plugin.getLogger().warning("resource-pack.url '" + url + "' is not a valid URL: " + e.getReason());
+            return;
+        }
+
+        String sha1String = plugin.getConfig().getString("resource-pack.sha1", "").trim();
+        if (!sha1String.matches("(?i)[0-9a-f]{40}")) {
+            plugin.getLogger().warning("resource-pack.sha1 is empty or not a 40 character hash, so the pack was not sent."
+                    + " Run /cl pack generate to fill it in.");
             return;
         }
 
         boolean required = plugin.getConfig().getBoolean("resource-pack.required", false);
+        boolean forcePrompt = plugin.getConfig().getBoolean("resource-pack.force-prompt-on-join", false);
 
-        Component prompt = MiniMessage.miniMessage().deserialize(
-                plugin.getConfig().getString("resource-pack.prompt-message", "<gold>Please accept the resource pack to see custom emojis!")
-        );
-
-        // Build the ResourcePackInfo using the modern Adventure API
         ResourcePackInfo packInfo = ResourcePackInfo.resourcePackInfo()
-                .uri(URI.create(url))
+                .uri(packUri)
                 .hash(sha1String)
                 .build();
 
-        // Build the request.
-        // If "force-prompt-on-join" is true, we set required to true to force the screen,
-        // otherwise we respect the config.
-        boolean forcePrompt = plugin.getConfig().getBoolean("resource-pack.force-prompt-on-join", false);
-        boolean shouldBeRequired = required || forcePrompt;
-
-        ResourcePackRequest request = ResourcePackRequest.resourcePackRequest()
+        var request = ResourcePackRequest.resourcePackRequest()
                 .packs(packInfo)
-                .prompt(prompt)
-                .required(shouldBeRequired)
-                .build();
+                .required(required || forcePrompt);
 
-        // Send using the Adventure API
-        player.sendResourcePacks(request);
+        if (plugin.getConfig().getBoolean("resource-pack.prompt-on-join", true)) {
+            request.prompt(MiniMessage.miniMessage().deserialize(
+                    plugin.getConfig().getString("resource-pack.prompt-message",
+                            "<gold>Please accept the resource pack to see the custom emojis!")));
+        }
+
+        player.sendResourcePacks(request.build());
     }
 
     public void sendPackToAll() {
         for (Player p : Bukkit.getOnlinePlayers()) {
             sendPack(p);
         }
+    }
+
+    /** Says out loud what would otherwise look like a silently broken install. */
+    public void warnIfUrlMissing() {
+        if (!plugin.getConfig().getBoolean("resource-pack.warn-if-url-missing", true)) return;
+
+        if (!plugin.getConfig().getBoolean("resource-pack.enabled", true)) {
+            // Hosting the pack while refusing to send it is a dead end that produces no symptom anywhere else.
+            if (plugin.getConfig().getBoolean("http-server.enabled", false)) {
+                plugin.getLogger().warning("http-server is hosting the pack, but resource-pack.enabled is false, so no pack is ever sent.");
+                plugin.getLogger().warning("Set resource-pack.enabled: true to deliver it.");
+            }
+            return;
+        }
+        if (!plugin.getConfig().getString("resource-pack.url", "").trim().isEmpty()) return;
+
+        plugin.getLogger().warning("resource-pack.enabled is true but resource-pack.url is empty, so players get no pack.");
+        plugin.getLogger().warning("Either set the URL yourself, or enable http-server so IconsLoader hosts and fills it in.");
     }
 }

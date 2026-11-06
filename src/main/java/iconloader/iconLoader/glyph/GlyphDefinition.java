@@ -10,9 +10,10 @@ public class GlyphDefinition {
     private final int ascent;
     private final int height;
     private final int customModelData;
-    private final List<String> aliases; // NEW
+    private final List<String> aliases;
+    private final boolean chatEnabled;
 
-    public GlyphDefinition(String name, String texturePath, String character, String permission, int ascent, int height, int customModelData, List<String> aliases) {
+    public GlyphDefinition(String name, String texturePath, String character, String permission, int ascent, int height, int customModelData, List<String> aliases, boolean chatEnabled) {
         this.name = name;
         this.texturePath = texturePath;
         this.character = character;
@@ -21,6 +22,7 @@ public class GlyphDefinition {
         this.height = height;
         this.customModelData = customModelData;
         this.aliases = aliases;
+        this.chatEnabled = chatEnabled;
     }
 
     public String getName() { return name; }
@@ -31,4 +33,5 @@ public class GlyphDefinition {
     public int getHeight() { return height; }
     public int getCustomModelData() { return customModelData; }
     public List<String> getAliases() { return aliases; }
+    public boolean isChatEnabled() { return chatEnabled; }
 }

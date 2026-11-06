@@ -1,18 +1,26 @@
+# Which file from lang/ players are messaged in. Unknown values fall back to en.
 language: "en"
 
+# Built-in pack host. Enable this instead of renting web space for a small server.
 http-server:
   enabled: false
   port: 8080
-  public-ip: "127.0.0.1" 
+  # The address players can actually reach you on, not the bind address.
+  public-ip: "127.0.0.1"
 
+# Notified whenever a player accepts or declines the pack. Leave empty to disable.
 discord-webhook:
-  url: "" 
+  url: ""
 
 resource-pack:
   enabled: true
+  # Leave empty and http-server.enabled=true to have the URL filled in automatically.
+  # Once you set this yourself, the plugin never overwrites it.
   url: ""
+  # Written for you by /cl pack generate.
   sha1: ""
   required: false
+  # Show the accept dialog text that is sent along with the pack.
   prompt-on-join: true
   kick-on-decline: true
   send-delay-ticks: 20
@@ -21,10 +29,15 @@ resource-pack:
   prompt-message: "<gold>Please accept the resource pack to see the custom emojis!"
 
 pack-generation:
+  # Relative to plugins/IconsLoader/. Absolute paths are not accepted.
   output-directory: "output"
   file-name: "IconsLoader-ResourcePack.zip"
+  # custom-model-data is only usable if the pack overrides one vanilla item's model.
+  # Set to an empty string to leave vanilla items alone and skip that table entirely.
+  override-item: "paper"
 
 textures:
+  # Folder inside plugins/IconsLoader/ that you drop PNG files into.
   directory: "icons"
   max-file-size-mb: 4
   max-width: 256
@@ -32,9 +45,20 @@ textures:
 
 chat:
   enabled: true
+  # When false, :HEART: no longer matches a glyph registered as heart.
   case-insensitive: true
+  # {name} is replaced by the glyph name. Applies to chat, anvil names, tab completion and the GUI.
   token-format: ":{name}:"
+  # false removes unknown tokens such as :notathing: instead of printing them literally.
   preserve-unknown-tokens: true
+  # Players need iconsloader.use before :emoji: renders for them.
   require-permission: true
   anti-spam: true
   cooldown-ms: 1000
+
+update-checker:
+  enabled: true
+  # Your SpigotMC resource id, e.g. 123456. Update checking stays off until you set it.
+  resource-id: ""
+  # Ops are told in chat when a newer version exists.
+  notify-on-join: true

@@ -1,5 +1,5 @@
 name: IconsLoader
-version: 3.0.0
+version: '@project.version@'
 main: iconloader.iconLoader.IconLoader
 api-version: '1.21'
 description: Ultimate Custom Emoji, Icon & Resource Pack Manager.

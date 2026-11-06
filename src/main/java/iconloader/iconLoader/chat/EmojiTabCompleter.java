@@ -2,13 +2,16 @@ package iconloader.iconLoader.chat;
 
 import iconloader.iconLoader.IconLoader;
 import iconloader.iconLoader.glyph.GlyphDefinition;
-import io.papermc.paper.event.player.AsyncChatEvent;
+import iconloader.iconLoader.util.EmojiTokenizer;
+import com.destroystokyo.paper.event.server.AsyncTabCompleteEvent;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import com.destroystokyo.paper.event.server.AsyncTabCompleteEvent;
+
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public class EmojiTabCompleter implements Listener {
     private final IconLoader plugin;
@@ -20,10 +23,12 @@ public class EmojiTabCompleter implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onTabComplete(AsyncTabCompleteEvent event) {
         String buffer = event.getBuffer();
-        
+
         // Only trigger if they are typing in chat (not commands) and using a colon
         if (buffer.startsWith("/") || !buffer.contains(":")) return;
 
+        String tokenFormat = EmojiTokenizer.sanitizeFormat(plugin.getConfig().getString("chat.token-format",
+                EmojiTokenizer.DEFAULT_FORMAT));
         int lastSpace = buffer.lastIndexOf(' ');
         String currentWord = buffer.substring(lastSpace + 1);
 
@@ -31,27 +36,25 @@ public class EmojiTabCompleter implements Listener {
         if (!currentWord.startsWith(":") || currentWord.endsWith(":")) return;
 
         String search = currentWord.substring(1).toLowerCase();
-        List<String> completions = new ArrayList<>();
+        Set<String> completions = new LinkedHashSet<>();
 
-        for (GlyphDefinition glyph : plugin.getConfigManager().getGlyphRegistry().getGlyphs().values()) {
-            // Check main name
-            if (glyph.getName().toLowerCase().startsWith(search)) {
-                completions.add(":" + glyph.getName() + ":");
+        for (GlyphDefinition glyph : plugin.getConfigManager().getGlyphRegistry().chatEnabledGlyphs()) {
+            String displayName = glyph.getName();
+            if (displayName.toLowerCase().startsWith(search)) {
+                completions.add(EmojiTokenizer.renderToken(displayName, tokenFormat));
             }
-            // Check aliases
             for (String alias : glyph.getAliases()) {
                 if (alias.toLowerCase().startsWith(search)) {
-                    completions.add(":" + alias + ":");
+                    completions.add(EmojiTokenizer.renderToken(alias, tokenFormat));
                 }
             }
         }
 
         if (!completions.isEmpty()) {
-            // Adjust the completions to replace the current word in the buffer
             List<String> adjustedCompletions = new ArrayList<>();
             String prefix = buffer.substring(0, lastSpace + 1);
-            for (String comp : completions) {
-                adjustedCompletions.add(prefix + comp);
+            for (String completion : completions) {
+                adjustedCompletions.add(prefix + completion);
             }
             event.setCompletions(adjustedCompletions);
         }

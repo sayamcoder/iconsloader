@@ -37,16 +37,33 @@ public class LangManager {
         fallbackConfig = YamlConfiguration.loadConfiguration(fallbackFile);
 
         File langFile = new File(langFolder, langName + ".yml");
+        if (!langFile.isFile()) {
+            plugin.getLogger().warning("language: '" + langName + "' has no matching file in lang/, falling back to English.");
+            langName = "en";
+            langFile = fallbackFile;
+        }
         langConfig = YamlConfiguration.loadConfiguration(langFile);
     }
 
-    public Component getMessage(String key) {
+    /** Raw translated template with {@code <prefix>} resolved, for places that need plain text such as GUI titles. */
+    public String getString(String key) {
         String prefix = langConfig.getString("prefix", fallbackConfig.getString("prefix", ""));
-        String msg = langConfig.getString(key, fallbackConfig.getString(key, "<red>Missing: " + key));
+        String msg = langConfig.getString(key, fallbackConfig.getString(key, "<red>Missing: " + key + "</red>"));
+        return msg.replace("<prefix>", prefix);
+    }
 
-        // FIX: Replace <prefix> literal string before parsing MiniMessage
-        msg = msg.replace("<prefix>", prefix);
+    public Component getMessage(String key) {
+        return MiniMessage.miniMessage().deserialize(getString(key));
+    }
 
+    /**
+     * @param placeholders alternating placeholder/value pairs, e.g. {@code "<size>", "42"}.
+     */
+    public Component getMessage(String key, String... placeholders) {
+        String msg = getString(key);
+        for (int i = 0; i + 1 < placeholders.length; i += 2) {
+            msg = msg.replace(placeholders[i], placeholders[i + 1]);
+        }
         return MiniMessage.miniMessage().deserialize(msg);
     }
 }

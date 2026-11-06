@@ -2,22 +2,21 @@ package iconloader.iconLoader.chat;
 
 import iconloader.iconLoader.IconLoader;
 import iconloader.iconLoader.glyph.GlyphDefinition;
+import iconloader.iconLoader.util.EmojiTokenizer;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.Map;
-import java.util.regex.Pattern;
-
 public class ItemEmojiListener implements Listener {
-    private final IconLoader plugin;
     private static final Key CUSTOM_FONT = Key.key("iconsloader:default");
-    private static final Pattern EMOJI_PATTERN = Pattern.compile(":([a-zA-Z0-9_]+):");
+
+    private final IconLoader plugin;
 
     public ItemEmojiListener(IconLoader plugin) {
         this.plugin = plugin;
@@ -30,20 +29,21 @@ public class ItemEmojiListener implements Listener {
 
         ItemMeta meta = result.getItemMeta();
         Component originalName = meta.displayName();
-        Map<String, GlyphDefinition> glyphs = plugin.getConfigManager().getGlyphRegistry().getGlyphs();
+        boolean caseInsensitive = plugin.getConfig().getBoolean("chat.case-insensitive", true);
 
-        TextReplacementConfig config = TextReplacementConfig.builder()
-            .match(EMOJI_PATTERN)
-            .replacement((matchResult, builder) -> {
-                GlyphDefinition glyph = glyphs.get(matchResult.group(1).toLowerCase());
-                if (glyph != null) {
-                    return Component.text(glyph.getCharacter()).font(CUSTOM_FONT);
-                }
-                return builder;
-            })
-            .build();
+        Component newName = originalName.replaceText(TextReplacementConfig.builder()
+                .match(EmojiTokenizer.pattern(plugin.getConfig()))
+                .replacement((matchResult, builder) -> {
+                    // chat-enabled only gates chat rendering; item names are always allowed.
+                    GlyphDefinition glyph = plugin.getConfigManager().getGlyphRegistry()
+                            .findByToken(matchResult.group(1), caseInsensitive);
+                    if (glyph == null) return builder;
+                    return Component.text(glyph.getCharacter())
+                            .font(CUSTOM_FONT)
+                            .decoration(TextDecoration.ITALIC, false);
+                })
+                .build());
 
-        Component newName = originalName.replaceText(config);
         if (!originalName.equals(newName)) {
             meta.displayName(newName);
             result.setItemMeta(meta);

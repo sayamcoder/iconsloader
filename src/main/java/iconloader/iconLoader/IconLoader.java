@@ -10,7 +10,6 @@ import iconloader.iconLoader.integration.PlaceholderApiIntegration;
 import iconloader.iconLoader.resourcepack.HttpServerManager;
 import iconloader.iconLoader.resourcepack.ResourcePackListener;
 import iconloader.iconLoader.resourcepack.ResourcePackManager;
-import iconloader.iconLoader.util.FileUtils;
 import iconloader.iconLoader.util.LangManager;
 import iconloader.iconLoader.util.UpdateChecker;
 import org.bukkit.Bukkit;
@@ -28,7 +27,6 @@ public final class IconLoader extends JavaPlugin {
     @Override
     public void onEnable() {
         printBanner();
-        FileUtils.extractDefaultTextures(this);
 
         this.langManager = new LangManager(this);
         this.configManager = new ConfigManager(this);
@@ -39,6 +37,7 @@ public final class IconLoader extends JavaPlugin {
         this.guiManager = new GuiManager(this);
         this.httpServerManager = new HttpServerManager(this);
         this.httpServerManager.start();
+        resourcePackManager.warnIfUrlMissing();
 
         CommandHandler commandHandler = new CommandHandler(this);
         PluginCommand clCommand = getCommand("cl");
@@ -59,15 +58,20 @@ public final class IconLoader extends JavaPlugin {
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) new PlaceholderApiIntegration(this).register();
 
         this.updateChecker = new UpdateChecker(this);
+        getServer().getPluginManager().registerEvents(updateChecker, this);
         this.updateChecker.checkForUpdates();
 
-        getLogger().info("IconsLoader v4.0 enabled successfully.");
+        getLogger().info("IconsLoader v" + getVersion() + " enabled successfully.");
     }
 
     @Override
     public void onDisable() {
         if (httpServerManager != null) httpServerManager.stop();
         getLogger().info("IconsLoader disabled.");
+    }
+
+    public String getVersion() {
+        return getPluginMeta().getVersion();
     }
 
     public ConfigManager getConfigManager() { return configManager; }
@@ -85,7 +89,7 @@ public final class IconLoader extends JavaPlugin {
             "§d   | | (_| (_) | | | \\__ \\| |__| (_) | (_| | (_| |  __/ |   ",
             "§d  |___\\___\\___/|_| |_|___/|_____\\___/ \\__,_|\\__,_|\\___|_|   ",
             "§8--------------------------------------------------",
-            "§7  Plugin: §fIconsLoader v4.0 §7| Author: §fSayam",
+            "§7  Plugin: §fIconsLoader v" + getVersion() + " §7| Author: §fSayam",
             "§8--------------------------------------------------"
         };
         for (String line : banner) { Bukkit.getConsoleSender().sendMessage(line); }

@@ -39,12 +39,22 @@ public class ResourcePackListener implements Listener {
         // Send to Discord Webhook
         if (status == PlayerResourcePackStatusEvent.Status.SUCCESSFULLY_LOADED) {
             DiscordWebhook.send(plugin, "✅ **" + player.getName() + "** accepted the resource pack.");
-        } else if (status == PlayerResourcePackStatusEvent.Status.DECLINED ||
-                   status == PlayerResourcePackStatusEvent.Status.FAILED_DOWNLOAD) {
+            return;
+        }
 
-            DiscordWebhook.send(plugin, "❌ **" + player.getName() + "** declined/failed to load the resource pack.");
+        if (status == PlayerResourcePackStatusEvent.Status.DECLINED
+                || status == PlayerResourcePackStatusEvent.Status.FAILED_DOWNLOAD) {
 
-            if (plugin.getConfig().getBoolean("resource-pack.required", false) && plugin.getConfig().getBoolean("resource-pack.kick-on-decline", true)) {
+            DiscordWebhook.send(plugin, "❌ **" + player.getName() + "** " + status.name().toLowerCase()
+                    + " the resource pack.");
+
+            // Mirrors how ResourcePackManager decides whether the pack was forced on the client.
+            boolean forced = plugin.getConfig().getBoolean("resource-pack.required", false)
+                    || plugin.getConfig().getBoolean("resource-pack.force-prompt-on-join", false);
+            if (forced && plugin.getConfig().getBoolean("resource-pack.kick-on-decline", true)) {
+                String url = plugin.getConfig().getString("resource-pack.url", "").trim();
+                if (url.isEmpty()) return;
+
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     if (player.isOnline()) player.kick(Component.text("You must accept the resource pack to play."));
                 });
